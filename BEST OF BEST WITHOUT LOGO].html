@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bales Purchased Form</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #329c52;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      width: 400px;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+
+    select,
+    input[type="text"],
+    input[type="date"],
+    input[type="submit"] {
+      width: calc(100% - 24px);
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    .error-message {
+      color: red;
+      margin-top: 5px;
+    }
+
+    .ps-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+      <h2>Bales Purchased Form</h2>
+      <form id="balesForm">
+        <div class="form-group">
+          <label for="date">Date:</label>
+          <input type="date" id="date" name="date" required>
+        </div>
+        <div class="form-group">
+          <label for="region">Region:</label>
+          <select id="region" name="region" required>
+            <option value="">Select Region</option>
+            <option value="Region 1">URAMBO</option>
+            <option value="Region 2">KALIUA</option>
+            <option value="Region 3">KIGOMA</option>
+            <option value="Region 4">KAHAMA</option>
+            <option value="Region 5">TABORA</option>
+            <option value="Region 6">SIKONGE</option>
+            <option value="Region 7">MPANDA</option>
+            <option value="Region 8">IRINGA</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="balesInfo">Select Information:</label>
+          <select id="balesInfo" name="balesInfo" onchange="showBalesFields()" required>
+            <option value="">Select Bales Information</option>
+            <option value="preparation">Bales Prepared</option>
+            <option value="purchase">Bales Bought</option>
+          </select>
+        </div>
+        <div id="psFields"></div>
+        <!-- Display total bales -->
+        <div class="form-group">
+          <label for="totalBales">Total Bales:</label>
+          <input type="text" id="totalBales" name="totalBales" readonly>
+        </div>
+        <input type="submit" value="Submit">
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function showBalesFields() {
+      var balesType = document.getElementById("balesInfo").value;
+      var psFields = document.getElementById("psFields");
+
+      psFields.innerHTML = '';
+
+      if (balesType === 'preparation' || balesType === 'purchase') {
+        for (var i = 0; i < 2; i++) {
+          var psGroup = document.createElement("div");
+          psGroup.classList.add("ps-group");
+
+          var psLabel = document.createElement("label");
+          psLabel.textContent = "PS Name " + (i + 1) + ":";
+
+          var psInput = document.createElement("input");
+          psInput.type = "text";
+          psInput.name = (balesType === "preparation") ? "psNamePrepared[]" : "psNameBought[]";
+          psInput.required = true;
+
+          var baleLabel = document.createElement("label");
+          baleLabel.textContent = "Number of " + ((balesType === "preparation") ? "Prepared Bales" : "Bales Bought") + ":";
+
+          var baleInput = document.createElement("input");
+          baleInput.type = "text";
+          baleInput.name = (balesType === "preparation") ? "psBalesPrepared[]" : "psBalesBought[]";
+          baleInput.required = true;
+          baleInput.pattern = "[0-9]+";
+
+          psGroup.appendChild(psLabel);
+          psGroup.appendChild(psInput);
+          psGroup.appendChild(baleLabel);
+          psGroup.appendChild(baleInput);
+
+          psFields.appendChild(psGroup);
+        }
+      }
+    }
+
+    // Function to calculate total bales
+    function calculateTotalBales() {
+      var totalBalesInput = document.getElementById("totalBales");
+      var psInputs = document.querySelectorAll(".ps-group input[type='text']");
+      var totalBales = 0;
+
+      // Loop through PS input fields and sum their values
+      psInputs.forEach(function(psInput) {
+        if (psInput.value.trim() !== "") {
+          totalBales += parseInt(psInput.value.trim()) || 0;
+        }
+      });
+
+      // Set the calculated total in the totalBales input field
+      totalBalesInput.value = totalBales;
+    }
+
+    // Add event listener to recalculate total bales on input change
+    document.getElementById("balesForm").addEventListener("input", calculateTotalBales);
+
+    document.getElementById("balesForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      if (validateForm()) {
+        alert("Form submitted successfully to the DATA TEAM!");
+        document.getElementById("balesForm").reset(); // Clear the form
+      }
+    });
+
+    function validateForm() {
+      var date = document.getElementById("date").value;
+      var region = document.getElementById("region").value;
+      var balesInfo = document.getElementById("balesInfo").value;
+      var totalBales = document.getElementById("totalBales").value;
+
+      var errorMessage = "";
+
+      if (!date) {
+        errorMessage += "Date is required.\n";
+      }
+
+      if (!region) {
+        errorMessage += "Region is required.\n";
+      }
+
+      if (!balesInfo) {
+        errorMessage += "Please select information (Prepared Bales or Bales Bought).\n";
+      }
+
+      var psInputs = document.querySelectorAll(".ps-group input[type='text']");
+      var psCount = psInputs.length / 2;
+      if (psCount === 0) {
+        errorMessage += "At least one Primary Society and bale number are required.\n";
+      }
+
+      if (!totalBales || isNaN(totalBales)) {
+        errorMessage += "Total Bales must be a number.\n";
+      }
+
+      if (errorMessage) {
+        alert(errorMessage);
+        return false;
+      }
+
+      return true;
+    }
+  </script>
+</body>
+</html>
